@@ -1,4 +1,4 @@
-import 'package:async/async.dart';
+//import 'package:async/async.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -9,15 +9,15 @@ void main() async {
   runApp(MaterialApp(
     home: Home(),
     theme: ThemeData(
-    hintColor: Colors.amber,
-    primaryColor: Colors.white,
-    inputDecorationTheme: InputDecorationTheme(
-      enabledBorder:
-          OutlineInputBorder(borderSide: BorderSide(color: Colors.amber)),
-      focusedBorder:
-          OutlineInputBorder(borderSide: BorderSide(color: Colors.amber)),
-      hintStyle: TextStyle(color: Colors.white),
-    )),
+        hintColor: Colors.amber,
+        primaryColor: Colors.white,
+        inputDecorationTheme: InputDecorationTheme(
+          enabledBorder:
+              OutlineInputBorder(borderSide: BorderSide(color: Colors.amber)),
+          focusedBorder:
+              OutlineInputBorder(borderSide: BorderSide(color: Colors.amber)),
+          hintStyle: TextStyle(color: Colors.white),
+        )),
   ));
 }
 
@@ -32,9 +32,67 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final realController = TextEditingController();
+  final dollarController = TextEditingController();
+  final euroController = TextEditingController();
+  final bitcoinController = TextEditingController();
+
   double dollar;
   double euro;
   double bitcoin;
+
+  void _realChanged(String text) {
+        if(text.isEmpty) {
+      _clearAll();
+      return;
+    }
+    double real = double.parse(text);
+    dollarController.text = (real / dollar).toStringAsFixed(2);
+    euroController.text = (real / euro).toStringAsFixed(2);
+    bitcoinController.text = (real / bitcoin).toStringAsFixed(7);
+  }
+
+  void _dollarChanged(String text) {   
+     if(text.isEmpty) {
+      _clearAll();
+      return;
+    }
+    double dollar = double.parse(text);
+    realController.text = (dollar * this.dollar).toStringAsFixed(2);
+    euroController.text = (dollar * this.dollar / euro).toStringAsFixed(2);
+    bitcoinController.text =
+        (dollar * this.dollar / bitcoin).toStringAsFixed(7);
+  }
+
+  void _euroChanged(String text) {
+        if(text.isEmpty) {
+      _clearAll();
+      return;
+    }
+    double euro = double.parse(text);
+    realController.text = (euro * this.euro).toStringAsFixed(2);
+    dollarController.text = (euro * this.euro / dollar).toStringAsFixed(2);
+    bitcoinController.text = (euro * this.euro / bitcoin).toStringAsFixed(7);
+  }
+
+  void _bitcoinChanged(String text) {
+        if(text.isEmpty) {
+      _clearAll();
+      return;
+    }
+    double bitcoin = double.parse(text);
+    realController.text = (bitcoin * this.bitcoin).toStringAsFixed(2);
+    dollarController.text =
+        (bitcoin * this.bitcoin / dollar).toStringAsFixed(2);
+    euroController.text = (bitcoin * this.bitcoin / euro).toStringAsFixed(7);
+  }
+
+  void _clearAll() {
+    realController.text = "";
+    dollarController.text = "";
+    euroController.text = "";
+    bitcoinController.text = "";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,55 +143,17 @@ class _HomeState extends State<Home> {
                           size: 150,
                           color: Colors.amber,
                         ),
-
-                        TextField(
-                          decoration: InputDecoration(
-                            labelText: "Reais",
-                            labelStyle: TextStyle(color: Colors.amber),
-                            border: OutlineInputBorder(),
-                            prefixText: "R\$  ",
-                          ),
-                          style: TextStyle(
-                            color: Colors.amber,
-                            fontSize: 25.0,
-                          ),
-                        ),Divider(),
-                          TextField(
-                          decoration: InputDecoration(
-                            labelText: "Dóllares",
-                            labelStyle: TextStyle(color: Colors.amber),
-                            border: OutlineInputBorder(),
-                            prefixText: "\$  ",
-                          ),
-                          style: TextStyle(
-                            color: Colors.amber,
-                            fontSize: 25.0,
-                          ),
-                        ),Divider(),
-                          TextField(
-                          decoration: InputDecoration(
-                            labelText: "Euros",
-                            labelStyle: TextStyle(color: Colors.amber),
-                            border: OutlineInputBorder(),
-                            prefixText: "€  ",
-                          ),
-                          style: TextStyle(
-                            color: Colors.amber,
-                            fontSize: 25.0,
-                          ),
-                        ),Divider(),
-                          TextField(
-                          decoration: InputDecoration(
-                            labelText: "BitCoin",
-                            labelStyle: TextStyle(color: Colors.amber),
-                            border: OutlineInputBorder(),
-                            prefixText: "BTC  ",
-                          ),
-                          style: TextStyle(
-                            color: Colors.amber,
-                            fontSize: 25.0,
-                          ),
-                        ),
+                        buildTextField(
+                            "Reais", "R\$  ", realController, _realChanged),
+                        Divider(),
+                        buildTextField("Dóllares", "US \$  ", dollarController,
+                            _dollarChanged),
+                        Divider(),
+                        buildTextField(
+                            "Euros", "€  ", euroController, _euroChanged),
+                        Divider(),
+                        buildTextField("Bit Coin", "BTC  ", bitcoinController,
+                            _bitcoinChanged),
                       ],
                     ),
                   );
@@ -142,4 +162,23 @@ class _HomeState extends State<Home> {
           }),
     );
   }
+}
+
+Widget buildTextField(
+    String label, String prefix, TextEditingController c, Function f) {
+  return TextField(
+    controller: c,
+    decoration: InputDecoration(
+      labelText: label,
+      labelStyle: TextStyle(color: Colors.amber),
+      border: OutlineInputBorder(),
+      prefixText: prefix,
+    ),
+    style: TextStyle(
+      color: Colors.amber,
+      fontSize: 25.0,
+    ),
+    onChanged: f,
+   keyboardType: TextInputType.numberWithOptions(decimal: true),
+  );
 }
